@@ -5,11 +5,12 @@ using UnityEngine;
 //I Implemented this, from https://www.youtube.com/watch?v=Qxs3GrhcZI8
 public class Projectile3D : MonoBehaviour
 {
-    [SerializeField] private float _InitialVelocity;
-    [SerializeField] private float _Angle;
+    [SerializeField] public bool canUse = true, canShoot = true, isShooted = false;
     [SerializeField] private LineRenderer _Line;
     [SerializeField] private float _Step;
     [SerializeField] private Transform _Firepoint;
+    [SerializeField] private Transform _Aim;
+    [SerializeField] private LayerMask maskLayer;
     private Camera _cam;
 
     private void Start()
@@ -21,8 +22,11 @@ public class Projectile3D : MonoBehaviour
     {
         Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, int.MaxValue, maskLayer) && canUse)
         {
+            if (!_Line.gameObject.activeSelf && canShoot)
+                _Line.gameObject.SetActive(true);
+            
             Vector3 direction = hit.point - _Firepoint.position;
             Vector3 groundDirection = new Vector3(direction.x, 0, direction.z);
             Vector3 targetPos = new Vector3(groundDirection.magnitude, direction.y, 0);
@@ -34,11 +38,20 @@ public class Projectile3D : MonoBehaviour
             CalculatePathWithHeight(targetPos, height, out v0, out angle, out time);
 
             DrawPath(groundDirection.normalized, v0, angle, time, _Step);
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (isShooted && canShoot)
             {
+                isShooted = false;
+                canShoot = false;
+                _Line.gameObject.SetActive(false);
                 StopAllCoroutines();
                 StartCoroutine(Coroutine_Movement(groundDirection.normalized, v0, angle, time));
             }
+        }
+        else
+        {
+            if (_Line.gameObject.activeSelf)
+                _Line.gameObject.SetActive(false);
+            isShooted = false;
         }
     }
 
@@ -57,6 +70,7 @@ public class Projectile3D : MonoBehaviour
         float xfinal = v0 * time * Mathf.Cos(angle);
         float yfinal = v0 * time * Mathf.Sin(angle) - 0.5f * -Physics.gravity.y * Mathf.Pow(time, 2);
         _Line.SetPosition(count, _Firepoint.position + direction * xfinal + Vector3.up * yfinal);
+        _Aim.transform.position = _Firepoint.position + direction * xfinal + Vector3.up * yfinal;
     }
 
     float QuadraticEquation(float a, float b, float c, float sign)
@@ -82,20 +96,13 @@ public class Projectile3D : MonoBehaviour
         v0 = b / Mathf.Sin(angle);
     }
     
-    void CalculatePath(Vector3 targetPos, float angle, out float v0, out float time)
+    void RotateTowards(Vector3 to) 
     {
-        float xt = targetPos.x;
-        float yt = targetPos.y;
-        float g = -Physics.gravity.y;
-
-        float v1 = Mathf.Pow(xt, 2) * g;
-        float v2 = 2 * xt * Mathf.Sin(angle) * Mathf.Cos(angle);
-        float v3 = 2 * yt * Mathf.Pow(Mathf.Cos(angle), 2);
-        v0 = Mathf.Sqrt(v1 / (v2-v3));
-        
-        time = xt / (v0 * Mathf.Cos(angle));
+        Quaternion lookRotation = Quaternion.LookRotation((to - transform.position).normalized);
+        transform.rotation = lookRotation; //instant
+        // transform.rotation = Quaternion.Slerp(transform.rotation, _lookRotation, Time.deltaTime * timeMultiplier); //over time
     }
-
+    
     IEnumerator Coroutine_Movement(Vector3 direction, float v0, float angle, float time)
     {
         float t = 0;
@@ -103,10 +110,16 @@ public class Projectile3D : MonoBehaviour
         {
             float x = v0 * t * Mathf.Cos(angle);
             float y = v0 * t * Mathf.Sin(angle) - (1f / 2f) * -Physics.gravity.y * Mathf.Pow(t, 2);
+            Vector3 rotationVector = _Firepoint.position + direction * x + Vector3.up * y;
+            RotateTowards(rotationVector);
             transform.position = _Firepoint.position + direction * x + Vector3.up * y;
-            
             t += Time.deltaTime;
             yield return null;
         }
+
+        yield return new WaitForSeconds(0.1f);
+        canShoot = true;
+        _Line.gameObject.SetActive(true);
     }
+    
 }

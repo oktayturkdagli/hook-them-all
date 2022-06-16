@@ -5,11 +5,11 @@ using Lean.Touch;
 
 public class PlayerManager: MonoBehaviour
 {
-    private Animator playerAnimator;
+    [SerializeField] private Projectile3D projectile3D;
+    
     private void Start()
     {
         EventManager.current.onStartGame += OnStartGame;
-        playerAnimator = transform.GetComponent<Animator>();
     }
     
     void OnStartGame()
@@ -17,9 +17,9 @@ public class PlayerManager: MonoBehaviour
         
     }
 
-    public void OnTap(LeanFinger finger)
+    public void OnUp(LeanFinger finger)
     {
-        Debug.Log("Tapped!");
+        projectile3D.isShooted = true;
     }
 
     private void OnDestroy()
