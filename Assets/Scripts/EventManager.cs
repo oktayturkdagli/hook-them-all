@@ -17,6 +17,8 @@ public class EventManager : MonoBehaviour
     public event Action onLoseGame;
     public event Action onEnemyHit;
     public event Action onEnemyPulled;
+    public event Action onAllyHit;
+    public event Action onAllyPulled;
     public event Action<int> onEarnAlly;
     public event Action<int> onLostAlly;
 
@@ -50,6 +52,16 @@ public class EventManager : MonoBehaviour
     public void OnEnemyPulled()
     {
         onEnemyPulled?.Invoke();
+    }
+    
+    public void OnAllyHit()
+    {
+        onAllyHit?.Invoke();
+    }
+    
+    public void OnAllyPulled()
+    {
+        onAllyPulled?.Invoke();
     }
     
     public void OnEarnAlly(int unit)

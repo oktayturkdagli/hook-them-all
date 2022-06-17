@@ -1,9 +1,12 @@
 using UnityEngine;
+using Lean.Touch;
 using DG.Tweening;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private ParticleSystem pulledEffect;
+    [SerializeField] private Projectile3D projectile3D;
+    [SerializeField] private ParticleSystem allyPulledEffect;
+    [SerializeField] private ParticleSystem enemyPulledEffect;
 
     void Start()
     {
@@ -13,6 +16,8 @@ public class GameManager : MonoBehaviour
         EventManager.current.onLoseGame += OnLoseGame;
         EventManager.current.onEnemyHit += OnEnemyHit;
         EventManager.current.onEnemyPulled += OnEnemyPulled;
+        EventManager.current.onAllyHit += OnAllyHit;
+        EventManager.current.onAllyPulled += OnAllyPulled;
         EventManager.current.OnStartGame();
     }
 
@@ -44,7 +49,22 @@ public class GameManager : MonoBehaviour
     
     void OnEnemyPulled()
     {
-        pulledEffect.Play();
+        allyPulledEffect.Play();
+    }
+    
+    void OnAllyHit()
+    {
+        
+    }
+    
+    void OnAllyPulled()
+    {
+        enemyPulledEffect.Play();
+    }
+    
+    public void OnUp(LeanFinger finger)
+    {
+        projectile3D.isShooted = true;
     }
 
     void LateStart()
@@ -60,5 +80,7 @@ public class GameManager : MonoBehaviour
         EventManager.current.onLoseGame -= OnLoseGame;
         EventManager.current.onEnemyHit -= OnEnemyHit;
         EventManager.current.onEnemyPulled -= OnEnemyPulled;
+        EventManager.current.onAllyHit -= OnAllyHit;
+        EventManager.current.onAllyPulled -= OnAllyPulled;
     }
 }

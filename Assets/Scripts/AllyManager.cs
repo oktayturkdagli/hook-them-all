@@ -3,27 +3,27 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.AI;
 
-public class EnemyManager : MonoBehaviour
+public class AllyManager: MonoBehaviour
 {
-    private Animator enemyAnimator;
+    private Animator allyAnimator;
     private Transform _Firepoint;
-    private TextMeshPro enemyMultiplier;
+    private TextMeshPro allyMultiplier;
     private int unit = 1;
 
     private void Start()
     {
-        enemyAnimator = GetComponent<Animator>();
-        enemyMultiplier = transform.GetChild(0).GetComponent<TextMeshPro>();
+        allyAnimator = GetComponent<Animator>();
+        allyMultiplier = transform.GetChild(0).GetComponent<TextMeshPro>();
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag.Equals("Projectile"))
+        if (collision.gameObject.tag.Equals("EnemyProjectile"))
         {
-            enemyAnimator.SetTrigger("Pull");
+            allyAnimator.SetTrigger("Pull");
             transform.GetComponent<WanderingAI>().enabled = false;
             transform.GetComponent<NavMeshAgent>().enabled = false;
-            EventManager.current.OnEnemyHit();
+            EventManager.current.OnAllyHit();
         }
     }
 
@@ -32,9 +32,9 @@ public class EnemyManager : MonoBehaviour
         if (other.gameObject.tag.Equals("Bridge"))
         {
             unit = 1;
-            string enemyText = enemyMultiplier.text.Replace("+", String.Empty);
-            Debug.Log(enemyText);
-            int enemyNumber = Int32.Parse(enemyText);
+            string allyText = allyMultiplier.text.Replace("+", String.Empty);
+            Debug.Log(allyText);
+            int enemyNumber = Int32.Parse(allyText);
             TextMeshPro bridgeMultiplier = other.transform.GetChild(0).GetComponent<TextMeshPro>();
             string bridgeText = bridgeMultiplier.text.ToString().ToLower();
             string operation = bridgeText.Substring(0,1);
@@ -52,16 +52,15 @@ public class EnemyManager : MonoBehaviour
                 result = 1;
 
             unit = result;
-            enemyMultiplier.text = "+" + result;
-            enemyMultiplier.gameObject.SetActive(true);
+            allyMultiplier.text = "+" + result;
+            allyMultiplier.gameObject.SetActive(true);
         }
-        else if (other.gameObject.tag.Equals("AllyArea"))
+        else if (other.gameObject.tag.Equals("EnemyArea"))
         {
-            enemyAnimator.SetTrigger("Stop");
-            EventManager.current.OnEnemyPulled();
-            EventManager.current.OnEarnAlly(unit);
+            allyAnimator.SetTrigger("Stop");
+            EventManager.current.OnAllyPulled();
+            EventManager.current.OnLostAlly(unit);
             transform.gameObject.SetActive(false);
         }
     }
-    
 }

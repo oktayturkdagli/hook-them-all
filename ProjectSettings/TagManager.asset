@@ -8,6 +8,9 @@ TagManager:
   - Bridge
   - Projectile
   - AllyArea
+  - EnemyProjectile
+  - EnemyArea
+  - Ally
   layers:
   - Default
   - TransparentFX

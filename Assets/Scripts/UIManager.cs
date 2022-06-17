@@ -104,7 +104,6 @@ public class UIManager : MonoBehaviour
 
     public void OnDown(LeanFinger finger)
     {
-        Debug.Log(bottomText.alpha);
         if (bottomText.alpha >= 1f)
             bottomText.DOFade(0f, 1f);
     }
