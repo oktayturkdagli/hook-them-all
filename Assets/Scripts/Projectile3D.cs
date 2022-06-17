@@ -1,6 +1,6 @@
-using System;
 using System.Collections;
 using UnityEngine;
+using DG.Tweening;
 
 //I Implemented this, from https://www.youtube.com/watch?v=Qxs3GrhcZI8
 public class Projectile3D : MonoBehaviour
@@ -11,14 +11,23 @@ public class Projectile3D : MonoBehaviour
     [SerializeField] private Transform _Firepoint;
     [SerializeField] private Transform _Aim;
     [SerializeField] private LayerMask maskLayer;
+    private Vector3 defaultPosition = Vector3.zero;
+    private Quaternion defaultRotation = Quaternion.identity;
     private Camera _cam;
 
     private void Start()
     {
         _cam = Camera.main;
+        defaultPosition = transform.position;
+        defaultRotation = transform.rotation;
     }
 
     private void Update()
+    {
+        HandleShoot();
+    }
+
+    void HandleShoot()
     {
         Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
@@ -36,7 +45,6 @@ public class Projectile3D : MonoBehaviour
             float v0;
             float time;
             CalculatePathWithHeight(targetPos, height, out v0, out angle, out time);
-
             DrawPath(groundDirection.normalized, v0, angle, time, _Step);
             if (isShooted && canShoot)
             {
@@ -54,7 +62,21 @@ public class Projectile3D : MonoBehaviour
             isShooted = false;
         }
     }
+    
+    void PullBack(Transform pullBackWithThis)
+    {
+        transform.DOMove(_Firepoint.transform.position, 2f).SetUpdate(UpdateType.Fixed).OnComplete(Reset);
+        pullBackWithThis.DOMove(_Firepoint.transform.position, 2f).SetUpdate(UpdateType.Fixed);
+    }
 
+    void Reset()
+    {
+        canShoot = true;
+        _Line.gameObject.SetActive(true);
+        transform.position = defaultPosition;
+        transform.rotation = defaultRotation;
+    }
+    
     void DrawPath(Vector3 direction, float v0, float angle, float time, float step)
     {
         step = Mathf.Max(0.01f, step);
@@ -118,8 +140,16 @@ public class Projectile3D : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.1f);
-        canShoot = true;
-        _Line.gameObject.SetActive(true);
+        Reset();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag.Equals("Enemy"))
+        {
+            StopAllCoroutines();
+            PullBack(collision.transform);
+        }
     }
     
 }

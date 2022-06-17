@@ -3,17 +3,16 @@ using DG.Tweening;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private Transform mainCamera;
-    [SerializeField] private Transform ballCamera;
-    [SerializeField] private Transform footballer;
-    [SerializeField] private Transform ball;
-    
+    [SerializeField] private ParticleSystem pulledEffect;
+
     void Start()
     {
         EventManager.current.onStartGame += OnStartGame;
         EventManager.current.onFinishGame += OnFinishGame;
         EventManager.current.onWinGame += OnWinGame;
         EventManager.current.onLoseGame += OnLoseGame;
+        EventManager.current.onEnemyHit += OnEnemyHit;
+        EventManager.current.onEnemyPulled += OnEnemyPulled;
         EventManager.current.OnStartGame();
     }
 
@@ -37,6 +36,16 @@ public class GameManager : MonoBehaviour
     {
         
     }
+    
+    void OnEnemyHit()
+    {
+        
+    }
+    
+    void OnEnemyPulled()
+    {
+        pulledEffect.Play();
+    }
 
     void LateStart()
     {
@@ -49,5 +58,7 @@ public class GameManager : MonoBehaviour
         EventManager.current.onFinishGame -= OnFinishGame;
         EventManager.current.onWinGame -= OnWinGame;
         EventManager.current.onLoseGame -= OnLoseGame;
+        EventManager.current.onEnemyHit -= OnEnemyHit;
+        EventManager.current.onEnemyPulled -= OnEnemyPulled;
     }
 }
