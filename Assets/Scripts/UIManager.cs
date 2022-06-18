@@ -16,6 +16,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button restartButton;
     [SerializeField] private ParticleSystem[] winEffects;
     [SerializeField] private TextMeshProUGUI bottomText;
+    [SerializeField] private TextMeshProUGUI topText;
     [SerializeField] private TextMeshPro allyCountText;
     [SerializeField] private TextMeshPro enemyCountText;
 
@@ -84,12 +85,20 @@ public class UIManager : MonoBehaviour
     {
         allyCountText.text = (Int32.Parse(allyCountText.text) + unit).ToString();
         enemyCountText.text = (Int32.Parse(enemyCountText.text) - unit).ToString();
+        if (Int32.Parse(allyCountText.text) > 19)
+        {
+            EventManager.current.OnWinGame();
+        }
     }
     
     void OnLostAlly(int unit)
     {
         enemyCountText.text = (Int32.Parse(enemyCountText.text) + unit).ToString();
         allyCountText.text = (Int32.Parse(allyCountText.text) - unit).ToString();
+        if (Int32.Parse(enemyCountText.text) > 19)
+        {
+            EventManager.current.OnLoseGame();
+        }
     }
     
     public void OnPressNextButton()
@@ -106,6 +115,9 @@ public class UIManager : MonoBehaviour
     {
         if (bottomText.alpha >= 1f)
             bottomText.DOFade(0f, 1f);
+        
+        if (topText.alpha >= 1f)
+            topText.DOFade(0f, 1f);
     }
 
     void OnDestroy()

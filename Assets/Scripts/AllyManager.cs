@@ -33,7 +33,6 @@ public class AllyManager: MonoBehaviour
         {
             unit = 1;
             string allyText = allyMultiplier.text.Replace("+", String.Empty);
-            Debug.Log(allyText);
             int enemyNumber = Int32.Parse(allyText);
             TextMeshPro bridgeMultiplier = other.transform.GetChild(0).GetComponent<TextMeshPro>();
             string bridgeText = bridgeMultiplier.text.ToString().ToLower();
